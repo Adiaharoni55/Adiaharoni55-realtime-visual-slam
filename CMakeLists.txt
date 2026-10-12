@@ -29,3 +29,15 @@ add_executable(rtvm
 
 # The app uses the library (and inherits its PUBLIC include folder)
 target_link_libraries(rtvm PRIVATE rtvm_core)
+
+# ---- Compiler warnings ----
+# A small "interface" target that holds only settings, no code.
+# Any target that links it gets these warning flags.
+add_library(rtvm_warnings INTERFACE)
+target_compile_options(rtvm_warnings INTERFACE
+    $<$<CXX_COMPILER_ID:MSVC>:/W4>
+    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>
+)
+
+target_link_libraries(rtvm_core PRIVATE rtvm_warnings)
+target_link_libraries(rtvm      PRIVATE rtvm_warnings)
