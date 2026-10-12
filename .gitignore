@@ -3,6 +3,7 @@ data/
 models/*.onnx
 .DS_Store
 notes/
+.vscode/
 
 # Prerequisites
 *.d
