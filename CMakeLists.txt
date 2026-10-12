@@ -59,3 +59,20 @@ endif()
 
 target_link_libraries(rtvm_core PRIVATE rtvm_sanitizers)
 target_link_libraries(rtvm      PRIVATE rtvm_sanitizers)
+
+# ---- Unit tests ----
+option(RTVM_BUILD_TESTS "Build unit tests" ON)
+
+if(RTVM_BUILD_TESTS)
+    enable_testing()
+
+    # Download GoogleTest automatically (first configure only)
+    include(FetchContent)
+    FetchContent_Declare(googletest
+        URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+    FetchContent_MakeAvailable(googletest)
+
+    add_subdirectory(tests)
+endif()
