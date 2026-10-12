@@ -1,0 +1,24 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false        # keep testing other systems if one fails
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4          # get the code
+      - uses: lukka/get-cmake@latest       # install CMake + Ninja
+      - uses: ilammy/msvc-dev-cmd@v1       # set up the MSVC compiler (Windows only)
+        if: runner.os == 'Windows'
+
+      - name: Configure
+        run: cmake --preset debug
+      - name: Build
+        run: cmake --build --preset debug
+      - name: Test
+        run: ctest --test-dir build/debug --output-on-failure
