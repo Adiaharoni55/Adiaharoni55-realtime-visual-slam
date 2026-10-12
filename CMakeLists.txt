@@ -41,3 +41,21 @@ target_compile_options(rtvm_warnings INTERFACE
 
 target_link_libraries(rtvm_core PRIVATE rtvm_warnings)
 target_link_libraries(rtvm      PRIVATE rtvm_warnings)
+
+# ---- Sanitizers (Debug builds only) ----
+# Catch memory bugs (ASan) and undefined behavior (UBSan) at runtime.
+option(RTVM_SANITIZERS "Enable ASan + UBSan in Debug builds" ON)
+
+add_library(rtvm_sanitizers INTERFACE)
+if(RTVM_SANITIZERS AND NOT MSVC AND CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_options(rtvm_sanitizers INTERFACE
+        -fsanitize=address,undefined
+        -fno-omit-frame-pointer   # gives readable stack traces in error reports
+    )
+    target_link_options(rtvm_sanitizers INTERFACE
+        -fsanitize=address,undefined
+    )
+endif()
+
+target_link_libraries(rtvm_core PRIVATE rtvm_sanitizers)
+target_link_libraries(rtvm      PRIVATE rtvm_sanitizers)
