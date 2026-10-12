@@ -1,3 +1,9 @@
+# private/large files
+data/
+models/*.onnx
+.DS_Store
+notes/
+
 # Prerequisites
 *.d
 
