@@ -22,6 +22,7 @@ add_library(rtvm_core
     src/version.cpp
     src/camera.cpp
     src/pose.cpp
+    src/tum_dataset.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder

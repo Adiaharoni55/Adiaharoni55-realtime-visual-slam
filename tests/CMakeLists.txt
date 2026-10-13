@@ -3,6 +3,7 @@ add_executable(rtvm_tests
     test_version.cpp
     test_camera.cpp
     test_pose.cpp
+    test_tum_dataset.cpp
 )
 
 # Tests use our library + GoogleTest (gtest_main provides main())
@@ -16,6 +17,7 @@ target_link_libraries(rtvm_tests PRIVATE
 # Give tests the absolute path of the configs/ folder
 target_compile_definitions(rtvm_tests PRIVATE
     RTVM_CONFIG_DIR="${PROJECT_SOURCE_DIR}/configs"
+    RTVM_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
 )
 
 # Register each TEST() with CTest, CMake's test runner
