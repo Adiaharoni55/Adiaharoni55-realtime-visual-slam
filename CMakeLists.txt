@@ -4,6 +4,9 @@ cmake_minimum_required(VERSION 3.25)
 # Project name, version, and language (CXX = C++)
 project(rtvm VERSION 0.0.1 LANGUAGES CXX)
 
+# ---- Dependencies (installed by vcpkg from vcpkg.json) ----
+find_package(Eigen3 CONFIG REQUIRED)
+
 # Use C++17 for the whole project, and fail if the compiler can't do it
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,6 +24,9 @@ add_library(rtvm_core
 target_include_directories(rtvm_core PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
+
+# The library uses Eigen, and so does anything that includes our headers
+target_link_libraries(rtvm_core PUBLIC Eigen3::Eigen)
 
 # ---- App: the rtvm command-line program ----
 add_executable(rtvm
