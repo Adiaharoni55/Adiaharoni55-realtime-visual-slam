@@ -1,5 +1,6 @@
 #pragma once
 
+#include "rtvm/pose.hpp"
 #include <string>
 #include <vector>
 
@@ -13,5 +14,15 @@ struct TimedFile {
 
 // Read rgb.txt or depth.txt. Skips comment lines (#). Throws if the file can't be opened.
 std::vector<TimedFile> readTumFileList(const std::string& path);
+
+// One line of groundtruth.txt: a timestamp and the true camera pose.
+struct TimedPose {
+    double timestamp;   // seconds
+    Pose pose;          // camera pose in the world (motion-capture) frame
+};
+
+// Read groundtruth.txt ("timestamp tx ty tz qx qy qz qw"). Skips comment lines (#).
+// Throws if the file can't be opened or a line is malformed.
+std::vector<TimedPose> readTumGroundTruth(const std::string& path);
 
 }  // namespace rtvm
