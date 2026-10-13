@@ -18,6 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # ---- Library: the reusable SLAM code ----
 add_library(rtvm_core
     src/version.cpp
+    src/camera.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder

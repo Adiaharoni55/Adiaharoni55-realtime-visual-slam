@@ -1,6 +1,7 @@
 # Test program: all test files go in this list
 add_executable(rtvm_tests
     test_version.cpp
+    test_camera.cpp
 )
 
 # Tests use our library + GoogleTest (gtest_main provides main())
