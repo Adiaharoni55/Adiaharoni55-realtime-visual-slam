@@ -2,6 +2,7 @@
 add_executable(rtvm_tests
     test_version.cpp
     test_camera.cpp
+    test_pose.cpp
 )
 
 # Tests use our library + GoogleTest (gtest_main provides main())

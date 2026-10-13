@@ -19,6 +19,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(rtvm_core
     src/version.cpp
     src/camera.cpp
+    src/pose.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder
