@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <stdexcept>
+#include <string>
 #include "rtvm/camera.hpp"
 
 // A point 2 m ahead, a bit right and down, lands at pixel (370, 265).
@@ -36,4 +37,23 @@ TEST(PinholeCameraTest, RejectsInvalidInput) {
     rtvm::PinholeCamera cam(500.0, 500.0, 320.0, 240.0);
     EXPECT_THROW(cam.project(Eigen::Vector3d(0.2, 0.1, -2.0)), std::invalid_argument);
     EXPECT_THROW(cam.backproject(Eigen::Vector2d(370.0, 265.0), -2.0), std::invalid_argument);
+}
+
+// Loading the TUM fr1 config gives exactly the values in the file.
+TEST(PinholeCameraTest, LoadsFromYaml) {
+    std::string path = std::string(RTVM_CONFIG_DIR) + "/tum_fr1.yaml";
+
+    rtvm::PinholeCamera cam = rtvm::loadCameraFromYaml(path);
+
+    EXPECT_NEAR(cam.fx, 517.3, 1e-9);
+    EXPECT_NEAR(cam.fy, 516.5, 1e-9);
+    EXPECT_NEAR(cam.cx, 318.6, 1e-9);
+    EXPECT_NEAR(cam.cy, 255.3, 1e-9);
+}
+
+// Loading a file that doesn't exist throws instead of returning a broken camera.
+
+TEST(PinholeCameraTest, LoadFromMissingFileThrows) {
+    std::string path = std::string(RTVM_CONFIG_DIR) + "/no_such_file.yaml";
+    EXPECT_ANY_THROW(rtvm::loadCameraFromYaml(path));
 }

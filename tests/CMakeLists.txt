@@ -13,6 +13,11 @@ target_link_libraries(rtvm_tests PRIVATE
     rtvm_sanitizers
 )
 
+# Give tests the absolute path of the configs/ folder
+target_compile_definitions(rtvm_tests PRIVATE
+    RTVM_CONFIG_DIR="${PROJECT_SOURCE_DIR}/configs"
+)
+
 # Register each TEST() with CTest, CMake's test runner
 include(GoogleTest)
 gtest_discover_tests(rtvm_tests)

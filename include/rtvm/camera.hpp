@@ -21,4 +21,7 @@ struct PinholeCamera {
     Eigen::Vector3d backproject(const Eigen::Vector2d& pixel, double depth) const;
 };
 
+// Read fx, fy, cx, cy from a YAML file. Throws if the file or a value is missing.
+PinholeCamera loadCameraFromYaml(const std::string& path);
+
 }  // namespace rtvm

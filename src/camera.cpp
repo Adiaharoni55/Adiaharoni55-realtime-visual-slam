@@ -1,4 +1,5 @@
 #include "rtvm/camera.hpp"
+#include <yaml-cpp/yaml.h>
 #include <stdexcept>
 
 namespace rtvm {
@@ -12,7 +13,7 @@ PinholeCamera::PinholeCamera(double fx_in, double fy_in, double cx_in, double cy
 }
 
 // 3D point (X, Y, Z) -> pixel (u, v). Z must be > 0.
-Eigen::Vector2d  PinholeCamera::project(const Eigen::Vector3d& point) const{
+Eigen::Vector2d PinholeCamera::project(const Eigen::Vector3d& point) const{
     if (point.z() <= 0){
         throw std::invalid_argument("project: point must be in front of the camera (Z > 0)");
     }
@@ -29,6 +30,15 @@ Eigen::Vector3d PinholeCamera::backproject(const Eigen::Vector2d& pixel, double 
     double x = (pixel.x() - cx) * depth / fx;
     double y = (pixel.y() - cy) * depth / fy;
     return Eigen::Vector3d(x, y, depth);
+}
+
+PinholeCamera loadCameraFromYaml(const std::string& path){
+    YAML::Node config = YAML::LoadFile(path);
+    double fx = config["fx"].as<double>();
+    double fy = config["fy"].as<double>();
+    double cx = config["cx"].as<double>();
+    double cy = config["cy"].as<double>();
+    return PinholeCamera(fx, fy, cx, cy);
 }
 
 } // namespace rtvm
