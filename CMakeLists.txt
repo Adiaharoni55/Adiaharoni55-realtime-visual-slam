@@ -6,6 +6,7 @@ project(rtvm VERSION 0.0.1 LANGUAGES CXX)
 
 # ---- Dependencies (installed by vcpkg from vcpkg.json) ----
 find_package(Eigen3 CONFIG REQUIRED)
+find_package(yaml-cpp CONFIG REQUIRED)
 
 # Use C++17 for the whole project, and fail if the compiler can't do it
 set(CMAKE_CXX_STANDARD 17)
@@ -27,8 +28,10 @@ target_include_directories(rtvm_core PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-# The library uses Eigen, and so does anything that includes our headers
+# Eigen: PUBLIC, because our headers use Eigen types (users need it too).
 target_link_libraries(rtvm_core PUBLIC Eigen3::Eigen)
+# yaml-cpp: PRIVATE, only used inside our .cpp files.
+target_link_libraries(rtvm_core PRIVATE yaml-cpp::yaml-cpp)
 
 # ---- App: the rtvm command-line program ----
 add_executable(rtvm

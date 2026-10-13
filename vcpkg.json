@@ -2,7 +2,8 @@
   "name": "rtvm",
   "version": "0.0.1",
   "dependencies": [
-    "eigen3"
+    "eigen3",
+    "yaml-cpp"
   ],
   "builtin-baseline": "e456309491fd875487bf02b8a0dca76c1b1b00cc"
 }
