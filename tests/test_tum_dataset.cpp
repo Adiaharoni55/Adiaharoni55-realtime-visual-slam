@@ -41,3 +41,47 @@ TEST(TumDatasetTest, MissingGroundTruthThrows) {
     std::string path = std::string(RTVM_TEST_DATA_DIR) + "/no_such_file.txt";
     EXPECT_THROW(rtvm::readTumGroundTruth(path), std::runtime_error);
 }
+
+// Each RGB image gets the depth image and pose with the closest timestamps.
+TEST(TumDatasetTest, AssociatesClosestDepthAndPose) {
+    // RGB at t = 1.000
+    std::vector<rtvm::TimedFile> rgb = {{1.000, "rgb/a.png"}};
+    // Depth at 0.990 (10 ms away) and 1.005 (5 ms away): 1.005 is closer
+    std::vector<rtvm::TimedFile> depth = {{0.990, "depth/x.png"}, {1.005, "depth/y.png"}};
+    // Poses at 0.995 (5 ms away, at x = 1) and 1.020 (20 ms away, at x = 2): 0.995 is closer
+    std::vector<rtvm::TimedPose> gt = {
+        {0.995, rtvm::poseFromTum(1, 0, 0, 0, 0, 0, 1)},
+        {1.020, rtvm::poseFromTum(2, 0, 0, 0, 0, 0, 1)},
+    };
+
+    std::vector<rtvm::Frame> frames = rtvm::associateTum(rgb, depth, gt);
+
+    ASSERT_EQ(frames.size(), 1u);
+    EXPECT_EQ(frames[0].rgb_path, "rgb/a.png");
+    EXPECT_EQ(frames[0].depth_path, "depth/y.png");
+    EXPECT_NEAR(frames[0].ground_truth.translation().x(), 1.0, 1e-9);
+}
+
+// An RGB image with no depth image within max_diff is skipped.
+TEST(TumDatasetTest, SkipsFrameWithoutCloseDepth){
+    std::vector<rtvm::TimedFile> rgb = {{1.000, "rgb/a.png"}, {2.000, "rgb/b.png"}};
+    std::vector<rtvm::TimedFile> depth = {{1.01, "depth/x.png"}};
+        std::vector<rtvm::TimedPose> gt = {
+        {1.000, rtvm::poseFromTum(1, 0, 0, 0, 0, 0, 1)},
+        {2.000, rtvm::poseFromTum(2, 0, 0, 0, 0, 0, 1)} 
+    };
+
+    std::vector<rtvm::Frame> frames = rtvm::associateTum(rgb, depth, gt);
+
+    ASSERT_EQ(frames.size(), 1u);
+    EXPECT_EQ(frames[0].rgb_path, "rgb/a.png");
+    EXPECT_NEAR(frames[0].ground_truth.translation().x(), 1.0, 1e-9);
+}
+
+// Unsorted input is rejected, because binary search would give wrong matches.
+TEST(TumDatasetTest, RejectsUnsortedInput){
+    std::vector<rtvm::TimedFile> rgb = {{1.000, "rgb/a.png"}};
+    std::vector<rtvm::TimedFile> depth = {{1.005, "depth/y.png"}, {0.990, "depth/x.png"}};
+    std::vector<rtvm::TimedPose> gt = {{1.000, rtvm::poseFromTum(1, 0, 0, 0, 0, 0, 1)}};
+    EXPECT_THROW(rtvm::associateTum(rgb, depth, gt), std::runtime_error);
+}

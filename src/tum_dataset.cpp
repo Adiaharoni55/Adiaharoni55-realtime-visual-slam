@@ -2,6 +2,28 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <cmath>
+#include <algorithm>   
+
+namespace {
+
+// Index of the item whose timestamp is closest to t (items must not be empty).
+// Works for any type with a .timestamp member (TimedFile, TimedPose).
+template <typename T>
+std::size_t closestIndex(const std::vector<T>& items, double t) {
+    // Binary search: first item whose timestamp is >= t (items are sorted by time).
+    auto it = std::lower_bound(items.begin(), items.end(), t,
+                               [](const T& item, double value) { return item.timestamp < value; });
+
+    if (it == items.begin()) return 0;                 // t is before every item
+    if (it == items.end()) return items.size() - 1;    // t is after every item
+
+    // The closest is either this item or the one just before it.
+    std::size_t i = it - items.begin();
+    return (t - items[i - 1].timestamp <= items[i].timestamp - t) ? i - 1 : i;
+}
+
+}  // namespace
 
 namespace rtvm {
 
@@ -61,6 +83,44 @@ std::vector<TimedPose> readTumGroundTruth(const std::string& path){
         poses.push_back({timestamp, poseFromTum(tx, ty, tz, qx, qy, qz, qw)});
     }
     return poses;   
+}
+
+// Frames with no match within max_diff seconds are skipped.
+std::vector<Frame> associateTum(const std::vector<TimedFile>& rgb,
+                                const std::vector<TimedFile>& depth,
+                                const std::vector<TimedPose>& ground_truth,
+                                double max_diff) {
+    std::vector<Frame> frames;
+
+    // Nothing to match against: return no frames.
+    if (depth.empty() || ground_truth.empty()) {
+        return frames;
+    }
+
+    // closestIndex uses binary search, which needs time-sorted lists.
+    // TUM files are sorted; fail loudly if one isn't.
+    auto byTime = [](const auto& a, const auto& b) { return a.timestamp < b.timestamp; };
+    if (!std::is_sorted(depth.begin(), depth.end(), byTime) ||
+        !std::is_sorted(ground_truth.begin(), ground_truth.end(), byTime)) {
+        throw std::runtime_error("associateTum: depth and ground truth must be sorted by timestamp");
+    }
+
+
+    for (const TimedFile& image : rgb) {
+
+        // Closest depth image and ground-truth pose to this RGB image.
+        const TimedFile& d = depth[closestIndex(depth, image.timestamp)];
+        const TimedPose& g = ground_truth[closestIndex(ground_truth, image.timestamp)];
+
+        // Skip this image if either match is too far away in time.
+        if (std::abs(d.timestamp - image.timestamp) > max_diff ||
+            std::abs(g.timestamp - image.timestamp) > max_diff) {
+            continue;
+        }
+
+        frames.push_back({image.timestamp, image.path, d.path, g.pose});
+    }
+    return frames;
 }
 
 }  // namespace rtvm

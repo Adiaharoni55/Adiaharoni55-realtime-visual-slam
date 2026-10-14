@@ -25,4 +25,19 @@ struct TimedPose {
 // Throws if the file can't be opened or a line is malformed.
 std::vector<TimedPose> readTumGroundTruth(const std::string& path);
 
+// One synchronized frame: an RGB image, its depth image and the true pose.
+struct Frame {
+    double timestamp;         // RGB image time (seconds)
+    std::string rgb_path;
+    std::string depth_path;
+    Pose ground_truth;
+};
+
+// Match each RGB image with the closest depth image and ground-truth pose.
+// Frames with no match within max_diff seconds are skipped.
+std::vector<Frame> associateTum(const std::vector<TimedFile>& rgb,
+                                const std::vector<TimedFile>& depth,
+                                const std::vector<TimedPose>& ground_truth,
+                                double max_diff = 0.02);
+
 }  // namespace rtvm
