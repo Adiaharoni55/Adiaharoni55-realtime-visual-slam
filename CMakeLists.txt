@@ -23,6 +23,7 @@ add_library(rtvm_core
     src/camera.cpp
     src/pose.cpp
     src/tum_dataset.cpp
+    src/depth_source.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder

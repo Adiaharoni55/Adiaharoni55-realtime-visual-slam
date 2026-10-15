@@ -4,6 +4,7 @@ add_executable(rtvm_tests
     test_camera.cpp
     test_pose.cpp
     test_tum_dataset.cpp
+    test_depth_source.cpp
 )
 
 # Tests use our library + GoogleTest (gtest_main provides main())
