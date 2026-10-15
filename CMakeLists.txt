@@ -24,6 +24,7 @@ add_library(rtvm_core
     src/pose.cpp
     src/tum_dataset.cpp
     src/depth_source.cpp
+    src/features.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder
@@ -43,6 +44,10 @@ target_link_libraries(rtvm_core
 add_executable(rtvm
     apps/main.cpp
 )
+
+# ---- Demo: ORB matching between two TUM frames (writes matches.png) ----
+add_executable(rtvm_match_demo apps/match_demo.cpp)
+target_link_libraries(rtvm_match_demo PRIVATE rtvm_core rtvm_warnings rtvm_sanitizers)
 
 # The app uses the library (and inherits its PUBLIC include folder)
 target_link_libraries(rtvm PRIVATE rtvm_core)
