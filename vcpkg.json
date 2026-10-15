@@ -7,7 +7,7 @@
     {
       "name": "opencv4",
       "default-features": false,
-      "features": [ "png" ]
+      "features": [ "png", "calib3d" ]
     }
   ],
   "builtin-baseline": "e456309491fd875487bf02b8a0dca76c1b1b00cc"

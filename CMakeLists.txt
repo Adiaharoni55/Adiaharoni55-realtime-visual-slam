@@ -25,6 +25,7 @@ add_library(rtvm_core
     src/tum_dataset.cpp
     src/depth_source.cpp
     src/features.cpp
+    src/motion.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder
