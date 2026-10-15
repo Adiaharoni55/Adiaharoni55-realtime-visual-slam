@@ -36,5 +36,6 @@ TEST(FeaturesTest, MatchesRecoverKnownShift) {
         }
     }
     // at least 90% of matches are right
-        EXPECT_GT(correct, 0.85 * matches.size());  
+        EXPECT_GT(correct, 0.85 * matches.size())
+        << "correct: " << correct << " of " << matches.size() << " matches";   
 }

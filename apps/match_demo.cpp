@@ -21,9 +21,19 @@ int main(int argc, char** argv) {
     auto frames = rtvm::associateTum(rgb, depth, gt);
     std::cout << "Associated frames: " << frames.size() << '\n';
 
+    // Select two frames
+    auto frame1 = frames[0];
+    auto frame2 = frames[10];
+
+    // How far did the camera truly move between the two frames? (from ground truth)
+    rtvm::Pose motion = rtvm::relativePose(frame1.ground_truth, frame2.ground_truth);
+    std::cout << "True camera movement: " << motion.translation().norm() * 100 << " cm\n";
+    std::cout << "True camera rotation: "
+            << Eigen::AngleAxisd(motion.linear()).angle() * 180.0 / EIGEN_PI << " degrees\n";
+
     // Two frames a short time apart (10 frames = about 1/3 of a second).
-    cv::Mat img_a = cv::imread(dir + "/" + frames[0].rgb_path, cv::IMREAD_GRAYSCALE);
-    cv::Mat img_b = cv::imread(dir + "/" + frames[10].rgb_path, cv::IMREAD_GRAYSCALE);
+    cv::Mat img_a = cv::imread(dir + "/" + frame1.rgb_path, cv::IMREAD_GRAYSCALE);
+    cv::Mat img_b = cv::imread(dir + "/" + frame2.rgb_path, cv::IMREAD_GRAYSCALE);
 
     rtvm::FrameFeatures fa = rtvm::detectOrb(img_a);
     rtvm::FrameFeatures fb = rtvm::detectOrb(img_b);
