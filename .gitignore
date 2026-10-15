@@ -1,5 +1,5 @@
 # private/large files
-data/
+/data/
 models/*.onnx
 .DS_Store
 notes/
