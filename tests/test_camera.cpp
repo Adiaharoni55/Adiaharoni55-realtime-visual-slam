@@ -49,6 +49,8 @@ TEST(PinholeCameraTest, LoadsFromYaml) {
     EXPECT_NEAR(cam.fy, 516.5, 1e-9);
     EXPECT_NEAR(cam.cx, 318.6, 1e-9);
     EXPECT_NEAR(cam.cy, 255.3, 1e-9);
+    EXPECT_NEAR(cam.distortion[0], 0.2624, 1e-9);
+    EXPECT_NEAR(cam.distortion[4], 1.1633, 1e-9);
 }
 
 // Loading a file that doesn't exist throws instead of returning a broken camera.

@@ -1,12 +1,14 @@
 #include "rtvm/camera.hpp"
 #include <yaml-cpp/yaml.h>
 #include <stdexcept>
+#include <vector>
 
 namespace rtvm {
 
 // constructor 
-PinholeCamera::PinholeCamera(double fx_in, double fy_in, double cx_in, double cy_in)
-    : fx(fx_in), fy(fy_in), cx(cx_in), cy(cy_in) {
+PinholeCamera::PinholeCamera(double fx_in, double fy_in, double cx_in, double cy_in,
+                             std::array<double, 5> distortion_in)
+    : fx(fx_in), fy(fy_in), cx(cx_in), cy(cy_in), distortion(distortion_in) {
     if (fx <= 0 || fy <= 0) {
         throw std::invalid_argument("PinholeCamera: fx and fy must be > 0");
     }
@@ -32,13 +34,24 @@ Eigen::Vector3d PinholeCamera::backproject(const Eigen::Vector2d& pixel, double 
     return Eigen::Vector3d(x, y, depth);
 }
 
-PinholeCamera loadCameraFromYaml(const std::string& path){
+PinholeCamera loadCameraFromYaml(const std::string& path) {
     YAML::Node config = YAML::LoadFile(path);
-    double fx = config["fx"].as<double>();
-    double fy = config["fy"].as<double>();
-    double cx = config["cx"].as<double>();
-    double cy = config["cy"].as<double>();
-    return PinholeCamera(fx, fy, cx, cy);
+
+    // Distortion is optional: missing means a perfect lens (all zeros).
+    std::array<double, 5> distortion{};
+    if (config["distortion"]) {
+        std::vector<double> values = config["distortion"].as<std::vector<double>>();
+        if (values.size() != 5) {
+            throw std::invalid_argument("loadCameraFromYaml: distortion needs 5 values");
+        }
+        for (std::size_t i = 0; i < 5; ++i) {
+            distortion[i] = values[i];
+        }
+    }
+
+    return PinholeCamera(config["fx"].as<double>(), config["fy"].as<double>(),
+                         config["cx"].as<double>(), config["cy"].as<double>(),
+                         distortion);
 }
 
 } // namespace rtvm
