@@ -4,7 +4,7 @@
 
 A real-time C++17 SLAM system that estimates motion and builds a 3D map from a camera and a LiDAR. A deep-learning segmentation model (ONNX Runtime) masks moving objects such as people and cars, so they don't corrupt tracking.
 
-> **Status: work in progress.** The foundations (build system, CI, camera geometry, dataset loading) are done and tested. Visual odometry is being built now.
+> **Status: work in progress.** Visual odometry runs end to end on TUM RGB-D: 3.90 cm ATE at ~64 FPS on `fr1/xyz`. Keyframes and a backend are next.
 
 ## Progress
 
@@ -12,7 +12,7 @@ A real-time C++17 SLAM system that estimates motion and builds a 3D map from a c
 | --- | --- |
 | 1. Project setup: CMake, sanitizers, unit tests, CI on Linux / macOS / Windows | ✅ Done |
 | 2. Camera geometry: pinhole model, poses and quaternions, YAML camera config | ✅ Done |
-| 3. Visual odometry on TUM RGB-D | 🚧 In progress (dataset loader done) |
+| 3. Visual odometry on TUM RGB-D | 🚧 In progress (frame-to-frame VO working; keyframes next) |
 | 4. Backend: bundle adjustment, pose graph, loop closure | Planned |
 | 5. Masking moving objects with a deep-learning model (ONNX Runtime) | Planned |
 | 6. LiDAR + camera fusion on KITTI | Planned |
@@ -27,6 +27,28 @@ A real-time C++17 SLAM system that estimates motion and builds a 3D map from a c
 - **Camera config:** intrinsics loaded from YAML files in `configs/`.
 - **TUM RGB-D loader:** reads image lists and ground truth, and associates RGB, depth and ground-truth poses by timestamp (binary search, validated input).
 - **Unit tests** for all of the above (GoogleTest), run in CI on every push.
+- **ORB features:** detection and matching with Lowe's ratio test.
+- **Motion estimation:** PnP + RANSAC on depth-backprojected points, with keypoint undistortion.
+- **Visual odometry:** frame-to-frame tracking over a whole sequence, writing a TUM-format trajectory.
+
+## Results
+
+Frame-to-frame visual odometry on TUM `fr1/xyz` (796 frames, Release build, Apple Silicon). No backend optimization yet.
+
+| Metric | Value |
+| --- | --- |
+| ATE (RMSE) | 3.90 cm |
+| RPE (RMSE, 1 s windows) | 3.85 cm/s |
+| Speed | 15.6 ms/frame (~64 FPS, including image loading) |
+| Tracking failures | 0 / 796 |
+
+Evaluated with [evo](https://github.com/MichaelGrupp/evo):
+
+```bash
+./build/release/rtvm_run_vo data/rgbd_dataset_freiburg1_xyz configs/tum_fr1.yaml
+evo_ape tum data/rgbd_dataset_freiburg1_xyz/groundtruth.txt output/trajectory.txt --align
+evo_rpe tum data/rgbd_dataset_freiburg1_xyz/groundtruth.txt output/trajectory.txt --align --delta 30 --delta_unit f --all_pairs
+```
 
 ## Planned pipeline
 
@@ -75,8 +97,7 @@ The `data/` folder is not tracked by Git.
 realtime-visual-slam/
 ├── include/rtvm/   # Public headers
 ├── src/            # Library implementation
-├── apps/           # The rtvm command-line program
-├── tests/          # Unit tests and small test fixtures
+├── apps/           # Programs: rtvm, rtvm_match_demo, rtvm_run_vo├── tests/          # Unit tests and small test fixtures
 ├── configs/        # Camera parameters (YAML)
 ├── scripts/        # Python helpers (evaluation, model export)
 ├── docs/           # Design notes

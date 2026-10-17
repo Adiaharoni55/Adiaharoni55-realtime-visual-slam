@@ -25,6 +25,10 @@ struct TimedPose {
 // Throws if the file can't be opened or a line is malformed.
 std::vector<TimedPose> readTumGroundTruth(const std::string& path);
 
+// Write poses in TUM format ("timestamp tx ty tz qx qy qz qw"), one line per pose.
+// Throws if the file can't be created.
+void writeTumTrajectory(const std::string& path, const std::vector<TimedPose>& poses);
+
 // One synchronized frame: an RGB image, its depth image and the true pose.
 struct Frame {
     double timestamp;         // RGB image time (seconds)

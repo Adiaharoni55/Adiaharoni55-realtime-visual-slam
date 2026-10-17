@@ -26,6 +26,7 @@ add_library(rtvm_core
     src/depth_source.cpp
     src/features.cpp
     src/motion.cpp
+    src/visual_odometry.cpp
 )
 
 # Anyone using rtvm_core can #include "rtvm/..." from the include/ folder
@@ -49,6 +50,10 @@ add_executable(rtvm
 # ---- Demo: ORB matching between two TUM frames (writes matches.png) ----
 add_executable(rtvm_match_demo apps/match_demo.cpp)
 target_link_libraries(rtvm_match_demo PRIVATE rtvm_core rtvm_warnings rtvm_sanitizers)
+
+# ---- App: run visual odometry over a TUM sequence (writes output/trajectory.txt) ----
+add_executable(rtvm_run_vo apps/run_vo.cpp)
+target_link_libraries(rtvm_run_vo PRIVATE rtvm_core rtvm_warnings rtvm_sanitizers)
 
 # The app uses the library (and inherits its PUBLIC include folder)
 target_link_libraries(rtvm PRIVATE rtvm_core)

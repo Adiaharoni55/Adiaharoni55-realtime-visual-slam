@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <stdexcept>
 #include <string>
+#include <filesystem>
 #include "rtvm/tum_dataset.hpp"
 
 // Reading the sample list keeps the 2 data lines and skips the 3 comment lines.
@@ -84,4 +85,22 @@ TEST(TumDatasetTest, RejectsUnsortedInput){
     std::vector<rtvm::TimedFile> depth = {{1.005, "depth/y.png"}, {0.990, "depth/x.png"}};
     std::vector<rtvm::TimedPose> gt = {{1.000, rtvm::poseFromTum(1, 0, 0, 0, 0, 0, 1)}};
     EXPECT_THROW(rtvm::associateTum(rgb, depth, gt), std::runtime_error);
+}
+
+// Writing a trajectory and reading it back gives the same timestamps and positions.
+TEST(TumDatasetTest, WriteThenReadGivesSamePoses) {
+    // Two poses: positions (1,2,3) and (4,5,6), no rotation
+    std::vector<rtvm::TimedPose> poses = {
+        {1.5, rtvm::poseFromTum(1, 2, 3, 0, 0, 0, 1)},
+        {2.5, rtvm::poseFromTum(4, 5, 6, 0, 0, 0, 1)},
+    };
+    std::string path = (std::filesystem::temp_directory_path() / "rtvm_traj.txt").string();
+
+    // Round trip: write, then read back
+    rtvm::writeTumTrajectory(path, poses);
+    std::vector<rtvm::TimedPose> read = rtvm::readTumGroundTruth(path);
+
+    ASSERT_EQ(read.size(), 2u);
+    EXPECT_NEAR(read[1].timestamp, 2.5, 1e-6);
+    EXPECT_NEAR(read[1].pose.translation().z(), 6.0, 1e-6);
 }

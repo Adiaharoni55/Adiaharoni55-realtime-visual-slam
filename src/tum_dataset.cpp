@@ -3,7 +3,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
-#include <algorithm>   
+#include <algorithm>
+#include <iomanip>   
 
 namespace {
 
@@ -84,6 +85,24 @@ std::vector<TimedPose> readTumGroundTruth(const std::string& path){
     }
     return poses;   
 }
+
+void writeTumTrajectory(const std::string& path, const std::vector<TimedPose>& poses){
+    // Open the file for writing 
+    std::ofstream file(path);
+    if (!file) {
+        throw std::runtime_error("writeTumTrajectory: cannot open " + path);
+    }
+    file << "# timestamp tx ty tz qx qy qz qw\n";
+    file << std::fixed << std::setprecision(6);
+    for (const TimedPose& p : poses) {
+        Eigen::Quaterniond q(p.pose.linear());
+        Eigen::Vector3d t = p.pose.translation();
+        file << p.timestamp << ' '
+            << t.x() << ' ' << t.y() << ' ' << t.z() << ' '
+            << q.x() << ' ' << q.y() << ' ' << q.z() << ' ' << q.w() << '\n';    
+    }
+}
+
 
 // Frames with no match within max_diff seconds are skipped.
 std::vector<Frame> associateTum(const std::vector<TimedFile>& rgb,
